@@ -8,6 +8,7 @@ import kotlin.browser.window
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 class AttractorSim {
@@ -41,11 +42,22 @@ class AttractorSim {
 
     private val canvas: HTMLCanvasElement = initalizeCanvas()
     private val context: CanvasRenderingContext2D = canvas.getContext("2d") as CanvasRenderingContext2D
+
     private val particles: MutableList<Particle> = ArrayList()
     private var time = 0.0
     private var lastUpdate: Double? = null
-
     private var pause = true
+
+    private var accumulated = 0.0
+
+    var size = 32.0
+        private set
+
+    var weight: Double = 0.0
+        get() = (size*size*size) * 1e-2
+        private set
+
+
 
     fun play() {
         if (pause) {
@@ -65,9 +77,9 @@ class AttractorSim {
         context.strokeStyle = "rgb(0, 0, 0)"
         context.fillStyle = context.strokeStyle
         context.shadowColor = "rgb(255, 255, 255)"
-        context.shadowBlur = 16.0
+        context.shadowBlur = size/2
         context.beginPath()
-        context.ellipse(RADIUS, RADIUS, 32.0, 32.0, 0.0, 0.0, 2 * PI)
+        context.ellipse(RADIUS, RADIUS, size, size, 0.0, 0.0, 2 * PI)
         context.fill()
         context.stroke()
 
@@ -107,8 +119,14 @@ class AttractorSim {
     }
 
     fun update(deltaT: Double) {
-        particles.forEach { p -> p.update(deltaT) }
-        spawn()
+        particles.forEach { p -> p.update(deltaT, this) }
+        particles.removeAll { p -> p.dead }
+
+        accumulated += deltaT
+        if (accumulated >= 0.1) {
+            accumulated = 0.0
+            if (!pause) spawn()
+        }
     }
 
     fun clear() {
@@ -139,10 +157,14 @@ class AttractorSim {
         val spawnY = cos(spawnAngle) * VIEWPORT_RADIUS
 
         // Take a movement vector straight towards the center and angle it somewhat to the side (rotation around starting position)
-        val initialMoveAngle = Random.nextDouble(0.05 * PI, 0.25 * PI)
+        val initialMoveAngle = Random.nextDouble(0.25 * PI, 0.45 * PI)
         val moveX = (-spawnX) * cos(initialMoveAngle) - (-spawnY) * sin(initialMoveAngle)
         val moveY = (-spawnX) * sin(initialMoveAngle) + (-spawnY) * cos(initialMoveAngle)
 
-        particles.add(Particle(spawnX, spawnY, spawnX - moveX * 0.1, spawnY - moveY * 0.1))
+        val pxPerSecond = 300
+        val speedX = pxPerSecond * moveX / sqrt(moveX * moveX + moveY * moveY)
+        val speedY = pxPerSecond * moveY / sqrt(moveX * moveX + moveY * moveY)
+
+        particles.add(Particle(spawnX, spawnY, speedX, speedY))
     }
 }

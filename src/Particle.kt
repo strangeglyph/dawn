@@ -1,41 +1,116 @@
-
 import AttractorSim.Companion.RADIUS
 import org.w3c.dom.CanvasRenderingContext2D
-import kotlin.math.abs
-import kotlin.math.sqrt
+import kotlin.math.*
 
-class Particle(var x: Double, var y: Double, var lastX: Double, var lastY: Double) {
+const val GRAVITATION = 6.674e-11
+
+class PathSegment(val x: Double, val y: Double, val age: Double)
+
+class Particle(x: Double, y: Double, speedX: Double, speedY: Double) {
     companion object {
-        const val PATH_MAXAGE = 2.0
+        const val MAX_AGE = 50
+        const val PATH_MAX_AGE = 5.0
+        const val PHYSICS_STEP = 0.01
     }
 
-    fun dirX() = (x - lastX) / sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY))
-    fun dirY() = (y - lastY) / sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY))
+    private var age = 0.0
+    private var lastAge = -1.0
 
-    var age = 0.0
-    var speed = 50 // px/second
+    private var accumulatedTime = 0.0
 
-    class PathSegment(val x: Double, val y: Double, val age: Double)
 
-    val paths: MutableList<PathSegment> = ArrayList()
+    private var dist = sqrt(x * x + y * y)
+    private var angle = atan2(y, x)
+
+    private var lastDist = 0.0
+    private var lastAngle = 0.0
+
+    private val distROC
+        get() = (dist - lastDist) * (age - lastAge)
+    private val angleROC
+        get() = (angle - lastAngle) * (age - lastAge)
+
+    private val x
+        get() = dist * cos(angle)
+    private val y
+        get() = dist * sin(angle)
+
+    private var previousPhysicsStepX = lastDist * cos(lastAngle)
+    private var previousPhysicsStepY = lastDist * sin(lastAngle)
+
+
+    var dead = false
+        private set
+
+    private var decaying = false
+
+
+    private val paths: MutableList<PathSegment> = ArrayList()
 
     init {
-        paths.add(PathSegment(x, y, 0.0))
+        val lastX = x - speedX * PHYSICS_STEP
+        val lastY = y - speedY * PHYSICS_STEP
+        lastDist = sqrt(lastX * lastX + lastY * lastY)
+        lastAngle = atan2(lastY, lastX)
     }
 
+    fun update(fullDeltaT: Double, state: AttractorSim) {
+        accumulatedTime += fullDeltaT
 
-    fun update(deltaT: Double) {
-        paths.add(PathSegment(x, y, age))
-        while (paths[0].age < age - PATH_MAXAGE) paths.removeAt(0)
+        while (accumulatedTime >= 0) {
+            // Simulate one step into the future. We will interpolate during rendering
+            // println("Physics step - ${accumulatedTime / PHYSICS_STEP + 1} steps remaining")
+            previousPhysicsStepX = x
+            previousPhysicsStepY = y
 
+            fixedUpdate(PHYSICS_STEP, state)
+            accumulatedTime -= PHYSICS_STEP
+        }
+    }
+
+    fun fixedUpdate(deltaT: Double, state: AttractorSim) {
+        paths.removeAll { segment -> segment.age < age - PATH_MAX_AGE }
+
+        if (age != lastAge && !decaying) {
+            paths.add(PathSegment(x, y, age))
+
+            // println("r(n-1)=$lastDist, t(n-1)=$lastAngle")
+            // println("r( n )=$dist, t( n )=$angle")
+            // println("v_r(n)=$distROC, v_t(n)=$angleROC")
+
+            val distAccel = dist * angleROC * angleROC - (GRAVITATION * state.weight) / (dist * dist)
+            val angleAccel = -2.0 * distROC * angleROC / dist
+            // println("a_r(n)=$distAccel, a_t(n)=$angleAccel")
+
+            val nextDist = 2 * dist - lastDist + distAccel * deltaT * deltaT
+            val nextAngle = 2 * angle - lastAngle + angleAccel * deltaT * deltaT
+            // println("r(n+1)=$nextDist, t(n+1)=$nextAngle")
+
+            lastDist = dist
+            lastAngle = angle
+
+            dist = nextDist
+            angle = nextAngle
+        }
+
+        lastAge = age
         age += deltaT
 
-        val newX = x + dirX() * speed * deltaT
-        val newY = y + dirY() * speed * deltaT
-        lastX = x
-        lastY = y
-        x = newX
-        y = newY
+        if (sqrt(x * x + y * y) > 2 * RADIUS) {
+            decaying = true
+        }
+
+        if (sqrt(x * x + y * y) < state.size) {
+            decaying = true
+        }
+
+        if (age > MAX_AGE) {
+            decaying = true
+        }
+
+        if (decaying && paths.isEmpty()) {
+            dead = true
+        }
     }
 
     fun render(ctx: CanvasRenderingContext2D) {
@@ -43,6 +118,10 @@ class Particle(var x: Double, var y: Double, var lastX: Double, var lastY: Doubl
         ctx.fillStyle = ctx.strokeStyle
         ctx.lineWidth = 1.0
         //ctx.beginPath()
+
+        if (paths.isEmpty()) {
+            return
+        }
 
         val first = paths[0]
         var fromX = first.x
@@ -58,7 +137,11 @@ class Particle(var x: Double, var y: Double, var lastX: Double, var lastY: Doubl
             i++
         }
 
-        drawSecantLine(ctx, fromX, fromY, x, y)
+        // Interpolate final position between last physics step and the step simulated into the future
+        val alpha = (accumulatedTime + PHYSICS_STEP) / PHYSICS_STEP
+        val actualX = x * alpha + previousPhysicsStepX * (1 - alpha)
+        val actualY = y * alpha + previousPhysicsStepY * (1 - alpha)
+        drawSecantLine(ctx, fromX, fromY, actualX, actualY)
         ctx.beginPath()
         // ctx.ellipse(x + AttractorSim.RADIUS, y + AttractorSim.RADIUS, 2.0, 2.0, 0.0, 0.0, 2 * PI)
         ctx.fill()
@@ -93,8 +176,8 @@ fun drawSecantLine(ctx: CanvasRenderingContext2D, fromX: Double, fromY: Double, 
     var y2 = (-determinant * dx - abs(dy) * discriminantRoot) / distSq
 
 
-    var posOnLineP1 = (x1 - fromX)/dx
-    var posOnLineP2 = (x2 - fromX)/dx
+    var posOnLineP1 = (x1 - fromX) / dx
+    var posOnLineP2 = (x2 - fromX) / dx
 
     if (posOnLineP1 > posOnLineP2) {
         // Make sure that p1 is closer to from than p2
