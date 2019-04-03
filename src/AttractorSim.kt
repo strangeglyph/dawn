@@ -54,7 +54,7 @@ class AttractorSim {
         private set
 
     var weight: Double = 0.0
-        get() = (size*size*size) * 1e-2
+        get() = (size*size*size) * 1e2
         private set
 
 
@@ -119,7 +119,7 @@ class AttractorSim {
     }
 
     fun update(deltaT: Double) {
-        particles.forEach { p -> p.update(deltaT, this) }
+        particles.forEach { p -> p.update(deltaT) }
         particles.removeAll { p -> p.dead }
 
         accumulated += deltaT
@@ -157,14 +157,16 @@ class AttractorSim {
         val spawnY = cos(spawnAngle) * VIEWPORT_RADIUS
 
         // Take a movement vector straight towards the center and angle it somewhat to the side (rotation around starting position)
-        val initialMoveAngle = Random.nextDouble(0.25 * PI, 0.45 * PI)
+        var initialMoveAngle = Random.nextDouble(0.25 * PI, 0.45 * PI)
+        if (Random.nextBoolean()) initialMoveAngle *= -1
+
         val moveX = (-spawnX) * cos(initialMoveAngle) - (-spawnY) * sin(initialMoveAngle)
         val moveY = (-spawnX) * sin(initialMoveAngle) + (-spawnY) * cos(initialMoveAngle)
 
-        val pxPerSecond = 300
+        val pxPerSecond = 800
         val speedX = pxPerSecond * moveX / sqrt(moveX * moveX + moveY * moveY)
         val speedY = pxPerSecond * moveY / sqrt(moveX * moveX + moveY * moveY)
 
-        particles.add(Particle(spawnX, spawnY, speedX, speedY))
+        particles.add(Particle(spawnX, spawnY, speedX, speedY, this))
     }
 }

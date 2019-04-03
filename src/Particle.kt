@@ -1,4 +1,5 @@
 import AttractorSim.Companion.RADIUS
+import AttractorSim.Companion.VIEWPORT_RADIUS
 import org.w3c.dom.CanvasRenderingContext2D
 import kotlin.math.*
 
@@ -6,7 +7,7 @@ const val GRAVITATION = 6.674e-11
 
 class PathSegment(val x: Double, val y: Double, val age: Double)
 
-class Particle(x: Double, y: Double, speedX: Double, speedY: Double) {
+class Particle(x: Double, y: Double, speedX: Double, speedY: Double, val state: AttractorSim) {
     companion object {
         const val MAX_AGE = 50
         const val PATH_MAX_AGE = 5.0
@@ -54,37 +55,30 @@ class Particle(x: Double, y: Double, speedX: Double, speedY: Double) {
         lastAngle = atan2(lastY, lastX)
     }
 
-    fun update(fullDeltaT: Double, state: AttractorSim) {
+    fun update(fullDeltaT: Double) {
         accumulatedTime += fullDeltaT
 
         while (accumulatedTime >= 0) {
             // Simulate one step into the future. We will interpolate during rendering
-            // println("Physics step - ${accumulatedTime / PHYSICS_STEP + 1} steps remaining")
             previousPhysicsStepX = x
             previousPhysicsStepY = y
 
-            fixedUpdate(PHYSICS_STEP, state)
+            fixedUpdate(PHYSICS_STEP)
             accumulatedTime -= PHYSICS_STEP
         }
     }
 
-    fun fixedUpdate(deltaT: Double, state: AttractorSim) {
+    fun fixedUpdate(deltaT: Double) {
         paths.removeAll { segment -> segment.age < age - PATH_MAX_AGE }
 
         if (age != lastAge && !decaying) {
             paths.add(PathSegment(x, y, age))
 
-            // println("r(n-1)=$lastDist, t(n-1)=$lastAngle")
-            // println("r( n )=$dist, t( n )=$angle")
-            // println("v_r(n)=$distROC, v_t(n)=$angleROC")
-
             val distAccel = dist * angleROC * angleROC - (GRAVITATION * state.weight) / (dist * dist)
             val angleAccel = -2.0 * distROC * angleROC / dist
-            // println("a_r(n)=$distAccel, a_t(n)=$angleAccel")
 
             val nextDist = 2 * dist - lastDist + distAccel * deltaT * deltaT
             val nextAngle = 2 * angle - lastAngle + angleAccel * deltaT * deltaT
-            // println("r(n+1)=$nextDist, t(n+1)=$nextAngle")
 
             lastDist = dist
             lastAngle = angle
@@ -96,11 +90,11 @@ class Particle(x: Double, y: Double, speedX: Double, speedY: Double) {
         lastAge = age
         age += deltaT
 
-        if (sqrt(x * x + y * y) > 2 * RADIUS) {
+        if (sqrt(x * x + y * y) > 3 * RADIUS) {
             decaying = true
         }
 
-        if (sqrt(x * x + y * y) < state.size) {
+        if (sqrt(x * x + y * y) <= state.size) {
             decaying = true
         }
 
@@ -130,7 +124,7 @@ class Particle(x: Double, y: Double, speedX: Double, speedY: Double) {
         var i = 1
         while (i < paths.size) {
             val to = paths[i]
-            drawSecantLine(ctx, fromX, fromY, to.x, to.y)
+            drawSecantLine(ctx, state, fromX, fromY, to.x, to.y)
             fromX = to.x
             fromY = to.y
 
@@ -141,7 +135,7 @@ class Particle(x: Double, y: Double, speedX: Double, speedY: Double) {
         val alpha = (accumulatedTime + PHYSICS_STEP) / PHYSICS_STEP
         val actualX = x * alpha + previousPhysicsStepX * (1 - alpha)
         val actualY = y * alpha + previousPhysicsStepY * (1 - alpha)
-        drawSecantLine(ctx, fromX, fromY, actualX, actualY)
+        drawSecantLine(ctx, state, fromX, fromY, actualX, actualY)
         ctx.beginPath()
         // ctx.ellipse(x + AttractorSim.RADIUS, y + AttractorSim.RADIUS, 2.0, 2.0, 0.0, 0.0, 2 * PI)
         ctx.fill()
@@ -149,34 +143,41 @@ class Particle(x: Double, y: Double, speedX: Double, speedY: Double) {
     }
 }
 
-fun drawSecantLine(ctx: CanvasRenderingContext2D, fromX: Double, fromY: Double, toX: Double, toY: Double) {
+class IntersectionResult(val x: Double, val y: Double, val relativePosition: Double)
+
+sealed class LineCircleIntersection {
+    object NoIntersection : LineCircleIntersection()
+    class Tangent(val point: IntersectionResult) : LineCircleIntersection()
+    class Secant(val first: IntersectionResult, val second: IntersectionResult) : LineCircleIntersection()
+}
+
+fun getLineCircleIntersection(fromX: Double, fromY: Double, toX: Double, toY: Double, radius: Double): LineCircleIntersection {
     val dx = toX - fromX
     val dy = toY - fromY
     val distSq = dx * dx + dy * dy
-    if (distSq == 0.0) return
+    if (distSq == 0.0) return LineCircleIntersection.NoIntersection
 
     val determinant = fromX * toY - toX * fromY
-
-    val radius = AttractorSim.VIEWPORT_RADIUS
     val radiusSq = radius * radius
     val discriminant = radiusSq * distSq - determinant * determinant
-    if (discriminant <= 0) {
+    if (discriminant < 0) {
         // No intersection or tangent only
-        return
+        return LineCircleIntersection.NoIntersection
     }
 
     val discriminantRoot = sqrt(discriminant)
     val signDy = if (dy < 0) -1.0 else 1.0
-    //                         v
+
     var x1 = (determinant * dy + signDy * dx * discriminantRoot) / distSq
-    var x2 = (determinant * dy - signDy * dx * discriminantRoot) / distSq
-
-    //                          v
     var y1 = (-determinant * dx + abs(dy) * discriminantRoot) / distSq
-    var y2 = (-determinant * dx - abs(dy) * discriminantRoot) / distSq
-
-
     var posOnLineP1 = (x1 - fromX) / dx
+
+    if (discriminant == 0.0) {
+        return LineCircleIntersection.Tangent(IntersectionResult(x1, y1, posOnLineP1))
+    }
+
+    var x2 = (determinant * dy - signDy * dx * discriminantRoot) / distSq
+    var y2 = (-determinant * dx - abs(dy) * discriminantRoot) / distSq
     var posOnLineP2 = (x2 - fromX) / dx
 
     if (posOnLineP1 > posOnLineP2) {
@@ -194,44 +195,80 @@ fun drawSecantLine(ctx: CanvasRenderingContext2D, fromX: Double, fromY: Double, 
         posOnLineP2 = tmp
     }
 
-    /*
-    ctx.save()
-    ctx.beginPath()
+    return LineCircleIntersection.Secant(IntersectionResult(x1, y1, posOnLineP1), IntersectionResult(x2, y2, posOnLineP2))
+}
 
-    ctx.strokeStyle = "rgb(255, 0, 0)"
-    ctx.moveTo(RADIUS, RADIUS)
-    ctx.lineTo(x1 + RADIUS, y1 + RADIUS)
-    ctx.moveTo(RADIUS, RADIUS)
-    ctx.lineTo(x2 + RADIUS, y2 + RADIUS)
+fun drawSecantLine(ctx: CanvasRenderingContext2D, state: AttractorSim, fromX: Double, fromY: Double, toX: Double, toY: Double) {
+    // First check for intersection with the viewport
+    // Then check for intersection with central attracktor
 
-    ctx.moveTo(fromX + RADIUS + 2, fromY + RADIUS + 2)
-    ctx.lineTo(toX + RADIUS + 2, toY + RADIUS + 2)
-    ctx.stroke()
-    ctx.restore()
-    */
+    val viewportIntersect = getLineCircleIntersection(fromX, fromY, toX, toY, VIEWPORT_RADIUS)
+            as? LineCircleIntersection.Secant
+            ?: return
 
-
-    if (posOnLineP2 < 0) {
+    if (viewportIntersect.second.relativePosition < 0) {
         // Line segment outside of circle, pointing away
         return
     }
 
-    if (posOnLineP1 > 1) {
+    if (viewportIntersect.first.relativePosition > 1) {
         // Line segment outside of circle, pointing towards
         return
     }
 
-    ctx.beginPath()
-    if (posOnLineP1 >= 0) {
-        ctx.moveTo(x1 + RADIUS, y1 + RADIUS)
+    val fromX = if (viewportIntersect.first.relativePosition >= 0) {
+        viewportIntersect.first.x
     } else {
-        ctx.moveTo(fromX + RADIUS, fromY + RADIUS)
+        fromX
     }
 
-    if (posOnLineP2 <= 1) {
-        ctx.lineTo(x2 + RADIUS, y2 + RADIUS)
+    val fromY = if (viewportIntersect.first.relativePosition >= 0) {
+        viewportIntersect.first.y
     } else {
-        ctx.lineTo(toX + RADIUS, toY + RADIUS)
+        fromY
     }
+
+    val toX = if (viewportIntersect.second.relativePosition <= 1) {
+        viewportIntersect.second.x
+    } else {
+        toX
+    }
+
+    val toY = if (viewportIntersect.second.relativePosition <= 1) {
+        viewportIntersect.second.y
+    } else {
+        toY
+    }
+
+
+    val attractorIntersection = getLineCircleIntersection(fromX, fromY, toX, toY, state.size)
+
+    // Assume that intersections with an attractor only happens with the towards the end of a line
+    ctx.beginPath()
+    ctx.moveTo(fromX + RADIUS, fromY + RADIUS)
+
+
+    when (attractorIntersection) {
+        is LineCircleIntersection.NoIntersection -> {
+            ctx.lineTo(toX + RADIUS, toY + RADIUS)
+        }
+
+        is LineCircleIntersection.Tangent -> {
+            if (attractorIntersection.point.relativePosition in 0.0..1.0) {
+                ctx.lineTo(attractorIntersection.point.x + RADIUS, attractorIntersection.point.y + RADIUS)
+            } else {
+                ctx.lineTo(toX + RADIUS, toY + RADIUS)
+            }
+        }
+
+        is LineCircleIntersection.Secant -> {
+            if (attractorIntersection.first.relativePosition in 0.0..1.0) {
+                ctx.lineTo(attractorIntersection.first.x + RADIUS, attractorIntersection.first.y + RADIUS)
+            } else {
+                ctx.lineTo(toX + RADIUS, toY + RADIUS)
+            }
+        }
+    }
+
     ctx.stroke()
 }
