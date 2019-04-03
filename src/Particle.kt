@@ -2,6 +2,7 @@ import AttractorSim.Companion.RADIUS
 import AttractorSim.Companion.VIEWPORT_RADIUS
 import org.w3c.dom.CanvasRenderingContext2D
 import kotlin.math.*
+import kotlin.random.Random
 
 const val GRAVITATION = 6.674e-11
 
@@ -47,6 +48,7 @@ class Particle(x: Double, y: Double, speedX: Double, speedY: Double, val state: 
 
 
     private val paths: MutableList<PathSegment> = ArrayList()
+    private val color = Random.nextInt(255)
 
     init {
         val lastX = x - speedX * PHYSICS_STEP
@@ -108,14 +110,32 @@ class Particle(x: Double, y: Double, speedX: Double, speedY: Double, val state: 
     }
 
     fun render(ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = "rgb(0, 255, 255)"
-        ctx.fillStyle = ctx.strokeStyle
-        ctx.lineWidth = 1.0
-        //ctx.beginPath()
 
         if (paths.isEmpty()) {
             return
         }
+
+        val gradient = ctx.createRadialGradient(RADIUS, RADIUS, 0.0, RADIUS, RADIUS, RADIUS)
+        /*
+        gradient.addColorStop(0.0, "#ffaf7b")
+        gradient.addColorStop(0.66, "#d76d77")
+        gradient.addColorStop(1.0, "#3a1c71")
+        */
+        /*
+        gradient.addColorStop(0.2, "#ff5f6d")
+        gradient.addColorStop(1.0, "#ffc371")
+         */
+        /*
+        gradient.addColorStop(0.2, "#dc2430")
+        gradient.addColorStop(1.0, "#7b4397")
+        */
+        gradient.addColorStop(0.2, "#ffed00")
+        gradient.addColorStop(1.0, "#ff0000")
+
+        ctx.beginPath()
+        ctx.strokeStyle = gradient // "hsl($color, 100%, 60%)"
+        ctx.fillStyle = ctx.strokeStyle
+        ctx.lineWidth = 1.5
 
         val first = paths[0]
         var fromX = first.x
@@ -136,9 +156,6 @@ class Particle(x: Double, y: Double, speedX: Double, speedY: Double, val state: 
         val actualX = x * alpha + previousPhysicsStepX * (1 - alpha)
         val actualY = y * alpha + previousPhysicsStepY * (1 - alpha)
         drawSecantLine(ctx, state, fromX, fromY, actualX, actualY)
-        ctx.beginPath()
-        // ctx.ellipse(x + AttractorSim.RADIUS, y + AttractorSim.RADIUS, 2.0, 2.0, 0.0, 0.0, 2 * PI)
-        ctx.fill()
         ctx.stroke()
     }
 }
@@ -244,9 +261,7 @@ fun drawSecantLine(ctx: CanvasRenderingContext2D, state: AttractorSim, fromX: Do
     val attractorIntersection = getLineCircleIntersection(fromX, fromY, toX, toY, state.size)
 
     // Assume that intersections with an attractor only happens with the towards the end of a line
-    ctx.beginPath()
     ctx.moveTo(fromX + RADIUS, fromY + RADIUS)
-
 
     when (attractorIntersection) {
         is LineCircleIntersection.NoIntersection -> {
@@ -270,5 +285,4 @@ fun drawSecantLine(ctx: CanvasRenderingContext2D, state: AttractorSim, fromX: Do
         }
     }
 
-    ctx.stroke()
 }
