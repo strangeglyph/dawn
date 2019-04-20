@@ -2,17 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="style.css" rel="stylesheet" type="text/css">
     <title>A Last Sunrise</title>
 </head>
 <body>
-<canvas width="800" height="600" class="attractor"></canvas>
-<button class="step" type="button">Step</button>
-<button class="spawn" type="button">Spawn</button>
-<button class="clear" type="button">Clear</button>
-<button class="pause" type="button">Pause</button>
-<button class="play" type="button">Play</button>
+<div id="gameplay-area">
+    <div id="content">
+        <div id="messages">
 
-<script src="out/production/sunrise/lib/kotlin.js"></script>
-<script src="out/production/sunrise/sunrise.js"></script>
+        </div>
+
+
+        <div id="tab-switcher">
+
+        </div>
+
+        <div id="location-indicator" style="display: none">
+            <span id="location-indicator-text"></span>
+        </div>
+
+
+        <div id="attractor-tab" class="tab" style="display: none">
+            <div class="description"></div>
+            <div class="interactions"></div>
+            <canvas width="800" height="600" id="attractor"></canvas>
+            <button id="step" class="debug_ctrl" type="button">Step</button>
+            <button id="spawn" class="debug_ctrl" type="button">Spawn</button>
+            <button id="clear" class="debug_ctrl" type="button">Clear</button>
+            <button id="pause" class="debug_ctrl" type="button">Pause</button>
+            <button id="play" class="debug_ctrl" type="button">Play</button>
+        </div>
+
+        <div id="outside" class="tab" style="display: block">
+            <div class="description"></div>
+            <div class="interactions"></div>
+        </div>
+
+    </div>
+
+    <div id="resources-div">
+
+    </div>
+</div>
+
+<div id="footer">
+    <a href="credits.html">Credits</a>
+</div>
+
+<script src="web/kotlin.js"></script>
+<script src="web/kotlinx-html-js.js"></script>
+<script src="web/sunrise.js"></script>
+
 </body>
 </html>

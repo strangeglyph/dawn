@@ -2,7 +2,6 @@
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLCanvasElement
-import org.w3c.dom.get
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.math.PI
@@ -11,6 +10,15 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.random.Random
 
+object AttractorTab: Tab("attractor-tab", "The Attractor", 10) {
+    private val attractorSim = AttractorSim()
+
+    override fun enable() {
+        super.enable()
+        attractorSim.draw()
+    }
+}
+
 class AttractorSim {
     companion object {
         const val DIAMETER = 600
@@ -18,7 +26,7 @@ class AttractorSim {
         const val VIEWPORT_RADIUS = RADIUS - 1
 
         fun initalizeCanvas(): HTMLCanvasElement {
-            val canvas = document.getElementsByClassName("attractor")[0] as HTMLCanvasElement
+            val canvas = document.getElementById("attractor") as HTMLCanvasElement
             val context = canvas.getContext("2d") as CanvasRenderingContext2D
             context.canvas.width = this.DIAMETER
             context.canvas.height = this.DIAMETER
@@ -28,15 +36,15 @@ class AttractorSim {
     }
 
     init {
-        val stepButton = document.getElementsByClassName("step")[0] as HTMLButtonElement
+        val stepButton = document.getElementById("step") as HTMLButtonElement
         stepButton.onclick = { if (pause) { update(deltaT = 1.0); draw() } }
-        val spawnButton = document.getElementsByClassName("spawn")[0] as HTMLButtonElement
+        val spawnButton = document.getElementById("spawn") as HTMLButtonElement
         spawnButton.onclick = { spawn(); draw() }
-        val clearButton = document.getElementsByClassName("clear")[0] as HTMLButtonElement
+        val clearButton = document.getElementById("clear") as HTMLButtonElement
         clearButton.onclick = { clear(); draw() }
-        val playButton = document.getElementsByClassName("play")[0] as HTMLButtonElement
+        val playButton = document.getElementById("play") as HTMLButtonElement
         playButton.onclick = { play() }
-        val pauseButton = document.getElementsByClassName("pause")[0] as HTMLButtonElement
+        val pauseButton = document.getElementById("pause") as HTMLButtonElement
         pauseButton.onclick = { pause() }
     }
 
@@ -158,7 +166,7 @@ class AttractorSim {
 
         // Take a movement vector straight towards the center and angle it somewhat to the side (rotation around starting position)
         var initialMoveAngle = Random.nextDouble(0.25 * PI, 0.45 * PI)
-        if (Random.nextBoolean()) initialMoveAngle *= -1
+        //if (Random.nextBoolean()) initialMoveAngle *= -1
 
         val moveX = (-spawnX) * cos(initialMoveAngle) - (-spawnY) * sin(initialMoveAngle)
         val moveY = (-spawnX) * sin(initialMoveAngle) + (-spawnY) * cos(initialMoveAngle)

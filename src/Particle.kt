@@ -11,7 +11,7 @@ class PathSegment(val x: Double, val y: Double, val age: Double)
 class Particle(x: Double, y: Double, speedX: Double, speedY: Double, val state: AttractorSim) {
     companion object {
         const val MAX_AGE = 50
-        const val PATH_MAX_AGE = 5.0
+        const val PATH_MAX_AGE = 0.5
         const val PHYSICS_STEP = 0.01
     }
 
