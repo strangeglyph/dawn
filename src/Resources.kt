@@ -1,4 +1,3 @@
-
 import kotlinx.html.classes
 import kotlinx.html.dom.create
 import kotlinx.html.img
@@ -12,7 +11,7 @@ import kotlin.browser.document
 object Resources {
     private val DIV = document.getElementById("resources-div") as HTMLDivElement
 
-    private val resourceCounter: Array<Int> = Array(Resource.values().size) { 0 }
+    private val resourceCounter: Array<Int> = Resource.values().map { it.initialAmount }.toTypedArray()
     private val isResourceVisible: Array<Boolean> = Array(Resource.values().size) { false }
 
     private val resoureDivs: Array<HTMLDivElement> = Resource.values().map { res ->
@@ -41,11 +40,22 @@ object Resources {
     }.toTypedArray()
 
 
-
     fun add(resource: Resource, amount: Int) {
         Messages.append("You gained $amount ${resource.displayName}.")
         val index = resource.ordinal
         resourceCounter[index] += amount
+        resourceCounterSpans[index].innerText = resourceCounter[index].toString()
+
+        if (!isResourceVisible[index]) {
+            DIV.appendChild(resoureDivs[index])
+            isResourceVisible[index] = true
+        }
+    }
+
+    fun remove(resource: Resource, amount: Int) {
+        Messages.append("You lost $amount ${resource.displayName}.")
+        val index = resource.ordinal
+        resourceCounter[index] -= amount
         resourceCounterSpans[index].innerText = resourceCounter[index].toString()
 
         if (!isResourceVisible[index]) {
@@ -59,8 +69,9 @@ object Resources {
     }
 }
 
-enum class Resource(val displayName: String, val order: Int, val iconPath: String) {
+enum class Resource(val displayName: String, val order: Int, val iconPath: String, val initialAmount: Int = 0) {
     ENERGY("Energy", 0, "resources/energy.svg"),
-    APPROACH_DIRECT("Going Through Obstacles", 1000, "resources/direct.svg"),
+    EXPLOSIVES("Explosives", 500, "resources/explosives.svg", initialAmount = 3),
+    APPROACH_DIRECT("No Nonsense", 1000, "resources/direct.svg"),
     APPROACH_INDIRECT("Thinking Outside The Box", 1010, "resources/indirect.svg")
 }
