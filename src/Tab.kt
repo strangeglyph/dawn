@@ -24,7 +24,7 @@ object LocationIndicator {
 }
 
 open class Tab(val divName: String, val displayName: String, val order: Int) {
-    private val MAIN_DIV = document.getElementById(divName) as HTMLDivElement
+    protected val MAIN_DIV = document.getElementById(divName) as HTMLDivElement
     private val INTERACTIONS = MAIN_DIV.getElementsByClassName("interactions")[0] as HTMLDivElement
     private val DESCRIPTION = MAIN_DIV.getElementsByClassName("description")[0] as HTMLDivElement
 

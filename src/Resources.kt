@@ -49,7 +49,7 @@ object Resources {
 
 
     fun add(resource: Resource, amount: Int) {
-        Messages.append("You gained $amount ${resource.displayName}.")
+        // Messages.append("You gained $amount ${resource.displayName}.")
         val index = resource.ordinal
         resourceCounter[index] += amount
         resourceCounterSpans[index].innerText = resourceCounter[index].toString()
@@ -61,7 +61,7 @@ object Resources {
     }
 
     fun remove(resource: Resource, amount: Int) {
-        Messages.append("You lost $amount ${resource.displayName}.")
+        // Messages.append("You lost $amount ${resource.displayName}.")
         val index = resource.ordinal
         resourceCounter[index] -= amount
         resourceCounterSpans[index].innerText = resourceCounter[index].toString()

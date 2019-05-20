@@ -13,19 +13,8 @@ div {
     display: grid;
     grid-template-columns: 20% 60% 20%;
     grid-template-rows: 100%;
-}
 
-
-#resources-div {
-    grid-column-start: 1;
-    grid-column-end: 2;
-    grid-row-start: 1;
-
-    display: flex;
-    flex-flow: column;
-    justify-content: start;
-
-    margin-right: 5em;
+    margin-top: 1em;
 }
 
 
@@ -36,8 +25,8 @@ div {
 }
 
 #messages {
-    height: 200px;
-    max-height: 200px;
+    height: 100px;
+    max-height: 100px;
     overflow-y: auto;
 }
 
@@ -58,6 +47,32 @@ div {
     display: flex;
     margin-top: 1em;
 }
+
+
+
+#log-content {
+    overflow-y: auto;
+}
+
+.log-element {
+    border-top: 1px solid grey;
+    padding-top: 1em;
+    padding-bottom: 0.5em;
+}
+
+.log-element:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.log-element:last-of-type {
+    padding-bottom: 0;
+}
+
+
+
+
+
 
 #location-indicator {
     position: relative;
@@ -89,6 +104,22 @@ div {
     top: 50%;
     left: 0;
     z-index: 1;
+}
+
+
+
+
+
+#resources-div {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+
+    display: flex;
+    flex-flow: column;
+    justify-content: start;
+
+    margin-right: 5em;
 }
 
 .resource-icon {
