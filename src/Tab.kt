@@ -37,6 +37,16 @@ open class Tab(val divName: String, val displayName: String, val order: Int) {
         LocationIndicator.set(displayName)
     }
 
+    fun addSingleUseInteraction(tag: String, desc: String, action: (MouseEvent) -> dynamic) {
+        INTERACTIONS.append {
+            button {
+                +desc
+                id = tag
+                classes = setOf("interaction")
+            }.onclick = { e -> action(e); removeInteraction(tag) }
+        }
+    }
+
     fun addInteraction(tag: String, desc: String, action: (MouseEvent) -> dynamic) {
         INTERACTIONS.append {
             button {

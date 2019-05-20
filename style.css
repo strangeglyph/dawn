@@ -36,10 +36,13 @@ div {
 }
 
 #messages {
+    height: 200px;
     max-height: 200px;
+    overflow-y: auto;
 }
 
 .interactions {
+    margin-top: 1em;
 }
 
 .interaction {
@@ -53,6 +56,7 @@ div {
 
 #tab-switcher {
     display: flex;
+    margin-top: 1em;
 }
 
 #location-indicator {

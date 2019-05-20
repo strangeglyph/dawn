@@ -1,5 +1,1 @@
-object Outside: Tab("outside", "Outside", 0) {
-
-
-
-}
+object Outside: Tab("outside", "Outside", 0)

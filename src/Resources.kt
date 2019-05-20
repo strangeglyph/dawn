@@ -8,6 +8,14 @@ import org.w3c.dom.HTMLSpanElement
 import org.w3c.dom.get
 import kotlin.browser.document
 
+enum class Resource(val displayName: String, val order: Int, val iconPath: String, val initialAmount: Int = 0) {
+    ENERGY("Energy", 0, "resources/energy.svg"),
+    BROKEN_DOOR("A Broken Door", 500, "resources/door_broken.svg"),
+    APPROACH_DIRECT("No Nonsense", 1000, "resources/direct.svg"),
+    APPROACH_INDIRECT("Thinking Outside The Box", 1010, "resources/indirect.svg")
+}
+
+
 object Resources {
     private val DIV = document.getElementById("resources-div") as HTMLDivElement
 
@@ -67,11 +75,4 @@ object Resources {
     fun get(resource: Resource): Int {
         return resourceCounter[resource.ordinal]
     }
-}
-
-enum class Resource(val displayName: String, val order: Int, val iconPath: String, val initialAmount: Int = 0) {
-    ENERGY("Energy", 0, "resources/energy.svg"),
-    EXPLOSIVES("Explosives", 500, "resources/explosives.svg", initialAmount = 3),
-    APPROACH_DIRECT("No Nonsense", 1000, "resources/direct.svg"),
-    APPROACH_INDIRECT("Thinking Outside The Box", 1010, "resources/indirect.svg")
 }
