@@ -1,6 +1,6 @@
 .idea
 build
-web
+deploy
 sunrise.iml
 gradle
 .gradle

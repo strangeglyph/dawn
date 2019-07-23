@@ -44,10 +44,17 @@ task assembleWeb(type: Sync) {
             }
         })
     }
+
+    into "${projectDir}/deploy"
     from compileKotlin2Js.destinationDir
-    into "${projectDir}/web"
+    from "${projectDir}/html"
+
+    into('resources') {
+        from "${projectDir}/resources"
+    }
 
     dependsOn classes
 }
+
 
 assemble.dependsOn assembleWeb
