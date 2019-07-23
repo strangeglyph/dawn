@@ -39,8 +39,8 @@ object Story {
         Outside.removeInteraction("force_open")
         Outside.removeInteraction("go_around")
 
-        AttractorTab.enable()
         Outside.enable()
+        Inside.enable()
         Log.enable()
 
         Outside.setDescription("Your torches shed light on a small area outside the base, maybe fifty strides across. In it, you recognize the all-too-familiar monotonicity of the icy wasteland.")
