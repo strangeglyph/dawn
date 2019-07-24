@@ -3,4 +3,5 @@ build
 deploy
 sunrise.iml
 gradle
+DESIGNNOTES.md
 .gradle

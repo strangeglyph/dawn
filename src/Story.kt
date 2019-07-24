@@ -41,9 +41,11 @@ object Story {
 
         Outside.enable()
         Inside.enable()
+        AttractorTab.enable()
         Log.enable()
 
         Outside.setDescription("Your torches shed light on a small area outside the base, maybe fifty strides across. In it, you recognize the all-too-familiar monotonicity of the icy wasteland.")
+        Inside.setDescription("The walls are iron plate and frost gives them a faint shimmer. A frozen wall blocks the path ahead.")
         AttractorTab.setDescription("The accelerator lies before you: The silent remnant of a long-gone past.")
 
         LocationIndicator.show()
