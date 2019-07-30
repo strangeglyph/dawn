@@ -12,8 +12,11 @@ enum class Resource(val displayName: String, val order: Int, val iconPath: Strin
     ENERGY("Energy", 0, "resources/energy.svg"),
     BROKEN_DOOR("A Broken Door", 500, "resources/door_broken.svg"),
     APPROACH_DIRECT("No Nonsense", 1000, "resources/direct.svg"),
-    APPROACH_INDIRECT("Thinking Outside The Box", 1010, "resources/indirect.svg")
+    APPROACH_INDIRECT("Thinking Outside The Box", 1010, "resources/indirect.svg"),
+    MANPOWER("Manpower", 10, "resources/manpower.svg", 10)
 }
+
+class ResourceStack(val resource: Resource, val amount: Int)
 
 
 object Resources {
