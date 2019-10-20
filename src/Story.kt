@@ -51,5 +51,19 @@ object Story {
         LocationIndicator.show()
         LocationIndicator.set(Outside.displayName)
 
+        Resources.add(Resource.MANPOWER, 0)
+        Resources.add(Resource.ENERGY, 6)
+
+        val clearIceTask = Interaction("Clear ice block", "clear_ice_block") {
+            Resources.add(Resource.ICE, 1)
+        }
+        clearIceTask.setRepeatable()
+                .incrementCost(Resource.MANPOWER, 1)
+                .progressCost(Resource.ENERGY, 2)
+                .withMaxConcurrent(5)
+                .timed(5000)
+
+        Inside.addInteraction(clearIceTask)
+
     }
 }

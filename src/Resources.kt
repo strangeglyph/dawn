@@ -8,12 +8,13 @@ import org.w3c.dom.HTMLSpanElement
 import org.w3c.dom.get
 import kotlin.browser.document
 
-enum class Resource(val displayName: String, val order: Int, val iconPath: String, val initialAmount: Int = 0) {
-    ENERGY("Energy", 0, "resources/energy.svg"),
-    BROKEN_DOOR("A Broken Door", 500, "resources/door_broken.svg"),
-    APPROACH_DIRECT("No Nonsense", 1000, "resources/direct.svg"),
-    APPROACH_INDIRECT("Thinking Outside The Box", 1010, "resources/indirect.svg"),
-    MANPOWER("Manpower", 10, "resources/manpower.svg", 10)
+enum class Resource(val displayName: String, val order: Int, val iconPath: String, val iconPathDepleted: String, val initialAmount: Int = 0) {
+    ENERGY("Energy", 0, "resources/energy.svg", "resources/energy_depleted.svg"),
+    BROKEN_DOOR("A Broken Door", 500, "resources/door_broken.svg", "resources/door_broken_depleted.svg"),
+    APPROACH_DIRECT("No Nonsense", 1000, "resources/direct.svg", "resources/direct_depleted.svg"),
+    APPROACH_INDIRECT("Thinking Outside The Box", 1010, "resources/indirect.svg", "resources/indirect_depleted.svg"),
+    MANPOWER("Manpower", 10, "resources/manpower.svg", "resources/manpower_depleted.svg", 10),
+    ICE("Ice", 20, "resources/ice.svg", "resources/ice_depleted.svg")
 }
 
 class ResourceStack(val resource: Resource, val amount: Int)
@@ -25,7 +26,7 @@ object Resources {
     private val resourceCounter: Array<Int> = Resource.values().map { it.initialAmount }.toTypedArray()
     private val isResourceVisible: Array<Boolean> = Array(Resource.values().size) { false }
 
-    private val resoureDivs: Array<HTMLDivElement> = Resource.values().map { res ->
+    private val resourceDivs: Array<HTMLDivElement> = Resource.values().map { res ->
         val div = document.create.div {
             classes = setOf("resource-line")
             img {
@@ -46,7 +47,7 @@ object Resources {
         div
     }.toTypedArray()
 
-    private val resourceCounterSpans: Array<HTMLSpanElement> = resoureDivs.map {
+    private val resourceCounterSpans: Array<HTMLSpanElement> = resourceDivs.map {
         it.getElementsByClassName("resource-counter")[0] as HTMLSpanElement
     }.toTypedArray()
 
@@ -58,9 +59,11 @@ object Resources {
         resourceCounterSpans[index].innerText = resourceCounter[index].toString()
 
         if (!isResourceVisible[index]) {
-            DIV.appendChild(resoureDivs[index])
+            DIV.appendChild(resourceDivs[index])
             isResourceVisible[index] = true
         }
+
+        InteractionModelViewMappings.updateInteractionsRequirementDisplay()
     }
 
     fun remove(resource: Resource, amount: Int) {
@@ -70,9 +73,11 @@ object Resources {
         resourceCounterSpans[index].innerText = resourceCounter[index].toString()
 
         if (!isResourceVisible[index]) {
-            DIV.appendChild(resoureDivs[index])
+            DIV.appendChild(resourceDivs[index])
             isResourceVisible[index] = true
         }
+
+        InteractionModelViewMappings.updateInteractionsRequirementDisplay()
     }
 
     fun get(resource: Resource): Int {

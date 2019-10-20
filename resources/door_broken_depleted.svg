@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 88 64"
+   x="0px"
+   y="0px"
+   version="1.1"
+   id="svg16"
+   sodipodi:docname="door_broken.svg"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   width="88"
+   height="64">
+  <metadata
+     id="metadata22">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Artboard 9</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs20" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     id="namedview18"
+     showgrid="false"
+     inkscape:zoom="5.5625733"
+     inkscape:cx="18.572384"
+     inkscape:cy="35.070749"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg16" />
+  <title
+     id="title2">Artboard 9</title>
+  <g
+     id="g10"
+     transform="translate(-4,-16)">
+    <path
+       style="fill:#bf0000"
+       d="m 90,16 a 1.9988,1.9988 0 0 0 -2,2 V 32 H 84 V 30 A 14.017,14.017 0 0 0 70,16 H 26 A 14.017,14.017 0 0 0 12,30 v 2 H 8 V 18 a 2,2 0 0 0 -4,0 v 60 a 2,2 0 0 0 4,0 V 64 h 4 v 10 a 1.9988,1.9988 0 0 0 2,2 h 68 a 1.9988,1.9988 0 0 0 2,-2 V 64 h 4 v 14 a 2,2 0 0 0 4,0 V 18 A 1.9988,1.9988 0 0 0 90,16 Z M 8,60 V 36 h 4 V 60 Z M 16,30 A 10.0105,10.0105 0 0 1 26,20 H 46 V 72 H 16 Z M 80,72 H 50 V 20 H 70 A 10.0105,10.0105 0 0 1 80,30 Z M 84,60 V 36 h 4 v 24 z"
+       id="path4"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#bf0000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 32.359124,28.315816 14.831265,14.831265 -15.820016,15.820016 8.254601,4.765796"
+       id="path4572"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#bf0000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 47.617323,50.944704 8.393607,14.538154 -3.889835,-6.737393 18.317476,-10.5756"
+       id="path4574"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#bf0000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 47.190389,43.147081 72.070294,36.48053 60.092407,39.689996 67.159556,27.449335"
+       id="path4576"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#bf0000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 31.370373,58.967097 22.583771,61.32146"
+       id="path4578"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>
