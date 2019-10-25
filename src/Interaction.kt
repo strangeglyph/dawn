@@ -192,9 +192,22 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
         }
     }
 
+    fun decrementToLimit() {
+        val diff = currentConcurrent - getResourceConcurrencyLimit()
+        returnMultiple(diff)
+        currentConcurrent -= diff
+        if (currentConcurrent == 0) {
+            pause()
+        }
+    }
+
     private fun returnIncrementCosts() {
+        returnMultiple(1)
+    }
+
+    private fun returnMultiple(amount: Int) {
         incrementCosts.forEach {
-            Resources.add(it.resource, it.amount)
+            Resources.add(it.resource, it.amount * amount)
         }
     }
 
@@ -205,7 +218,6 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
      * Otherwise, schedule a repeating invocation of the tick handler.
      */
     fun start() {
-        println("$tag: Attempting to start tick thread")
         if (timeToExecute == 0) {
             if (!canIncrement()) {
                 throw IllegalStateException("Not enough resources to activate action")
@@ -215,10 +227,10 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
             returnIncrementCosts()
         } else {
             if (tickThread == null) {
-                println("Starting ticking for $tag")
+                println("[$tag] Starting ticking")
                 lastTick = Date()
                 this.tickThread = window.setInterval({ tick() }, 20)
-            } else println("$tag: already exists")
+            } else println("[$tag] already exists")
         }
     }
 
@@ -227,7 +239,7 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
      */
     fun pause() {
         if (tickThread != null) {
-            println("Pausing $tag")
+            println("[$tag] Pausing")
             window.clearInterval(tickThread!!)
             tickThread = null
         }
@@ -251,9 +263,7 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
             action()
             if (repeatable) {
                 progress -= timeToExecute
-                while (currentConcurrent > getResourceConcurrencyLimit()) {
-                    decrement()
-                }
+                decrementToLimit()
                 takeProgressCosts()
                 progressCallback(0.0)
             } else {

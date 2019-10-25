@@ -90,6 +90,9 @@ div {
 .text-red {
     color: #bf0000;
 }
+.text-green {
+    color: #00bf00;
+}
 .float-right {
     float: right;
 }
@@ -183,7 +186,7 @@ div {
 .resource-line,
 .credit-line {
     display: grid;
-    grid-template-columns: 2em 70% auto;
+    grid-template-columns: 2em 70% 3em 1em;
 }
 
 .resource-name,
@@ -195,6 +198,13 @@ div {
 .resource-counter {
     grid-column-start: 3;
     text-align: right;
+}
+
+.resource-delta {
+    grid-column-start: 4;
+    text-align: right;
+    margin-left: 1em;
+    font-weight: bold;
 }
 
 

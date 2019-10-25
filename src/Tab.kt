@@ -61,6 +61,7 @@ object InteractionModelViewMappings {
         }
 
         viewMapping.incButton.disabled = !allReqsFulfilled || interaction.getCurrentActive() == interaction.getMaxConcurrent()
+        viewMapping.decButton.disabled = interaction.getCurrentActive() == 0
         viewMapping.amountSpan.innerText = "${interaction.getCurrentActive()}/${interaction.getMaxConcurrent()}"
     }
 

@@ -52,7 +52,7 @@ object Story {
         LocationIndicator.set(Outside.displayName)
 
         Resources.add(Resource.MANPOWER, 0)
-        Resources.add(Resource.ENERGY, 6)
+        Resources.add(Resource.ENERGY, 8)
 
         val clearIceTask = Interaction("Clear ice block", "clear_ice_block") {
             Resources.add(Resource.ICE, 1)
