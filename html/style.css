@@ -208,6 +208,18 @@ div {
 }
 
 
+.heat-div {
+    display: grid;
+    grid-template-columns: 5em auto;
+}
+
+.heat-indicator {
+    margin-top: auto;
+    margin-bottom: auto;
+    height: 8px;
+}
+
+
 #footer {
     position: absolute;
     bottom: 0;

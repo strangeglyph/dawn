@@ -1,7 +1,4 @@
-import kotlin.browser.window
-import kotlin.js.Date
-
-class Interaction(val description: String, val tag: String, val action: () -> Unit) {
+class Interaction(val description: String, val tag: String, val action: (Interaction) -> Unit) {
     private var repeatable: Boolean = false
     private val incrementCosts: MutableList<ResourceStack> = ArrayList()
     private val progressCosts: MutableList<ResourceStack> = ArrayList()
@@ -9,10 +6,9 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
     private var maxConcurrent: Int = 1
     private var currentConcurrent: Int = 0
     private var progress: Int = 0
-    private var lastTick = Date()
     private var finishedCallback: () -> Unit = {}
     private var progressCallback: (Double) -> Unit = {}
-    private var tickThread: Int? = null
+    private var pauseCallback: () -> Unit = {}
 
     /**
      * Marks a task as repeatable. Nonrepeatable tasks are automatically cleared once completed.
@@ -122,6 +118,14 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
     }
 
     /**
+     * Register a task callback to be called every time this task is paused.
+     */
+    fun onPause(pauseCallback: () -> Unit): Interaction {
+        this.pauseCallback = pauseCallback
+        return this
+    }
+
+    /**
      * Increment the number of currently running tasks. Has no effect if the number of concurrent instances is at max.
      *
      * If the necessary resources cannot be provided, throws {IllegalStateException}.
@@ -194,15 +198,17 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
 
     fun decrementToLimit() {
         val diff = currentConcurrent - getResourceConcurrencyLimit()
-        returnMultiple(diff)
-        currentConcurrent -= diff
-        if (currentConcurrent == 0) {
-            pause()
+        if (diff > 0) {
+            returnMultiple(diff)
+            currentConcurrent -= diff
+            if (currentConcurrent == 0) {
+                pause()
+            }
         }
     }
 
     private fun returnIncrementCosts() {
-        returnMultiple(1)
+        returnMultiple(currentConcurrent)
     }
 
     private fun returnMultiple(amount: Int) {
@@ -223,13 +229,12 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
                 throw IllegalStateException("Not enough resources to activate action")
             }
             takeIncrementCosts()
-            action()
+            action(this)
             returnIncrementCosts()
         } else {
-            if (tickThread == null) {
+            if (!TickThread.hasTask(tag)) {
                 println("[$tag] Starting ticking")
-                lastTick = Date()
-                this.tickThread = window.setInterval({ tick() }, 20)
+                TickThread.register(tag) { ms -> tick(ms) }
             } else println("[$tag] already exists")
         }
     }
@@ -238,18 +243,14 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
      * Pause execution of the task until {#start} is called again
      */
     fun pause() {
-        if (tickThread != null) {
+        if (TickThread.hasTask(tag)) {
             println("[$tag] Pausing")
-            window.clearInterval(tickThread!!)
-            tickThread = null
+            TickThread.unregister(tag)
         }
+        pauseCallback()
     }
 
-    private fun tick() {
-        val currentTime = Date()
-        val deltaMillis = (currentTime.getTime() - lastTick.getTime()).toInt()
-        lastTick = currentTime
-
+    private fun tick(deltaMillis: Int) {
         progress += deltaMillis * currentConcurrent
 
         // Notify tick handler of our progress, scaled from 0 to 1
@@ -260,7 +261,7 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
         }
 
         if (progress > timeToExecute) {
-            action()
+            action(this)
             if (repeatable) {
                 progress -= timeToExecute
                 decrementToLimit()
@@ -272,5 +273,14 @@ class Interaction(val description: String, val tag: String, val action: () -> Un
                 finishedCallback()
             }
         }
+    }
+
+    /**
+     * If this tasks was repeatable, end it, refunding increment costs and removing it from the UI
+     */
+    fun end() {
+        pause()
+        returnIncrementCosts()
+        finishedCallback()
     }
 }

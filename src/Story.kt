@@ -1,4 +1,6 @@
 object Story {
+    private var baseClearProgress: Int = 0;
+    private val BASE_CLEAR_THRESHOLD_1: Int = 5
 
     fun beginStory() {
         Messages.append("The sun has long become a pale spot on the sky, incapable of spending light and warmth. Your group " +
@@ -41,29 +43,74 @@ object Story {
 
         Outside.enable()
         Inside.enable()
-        AttractorTab.enable()
         Log.enable()
 
-        Outside.setDescription("Your torches shed light on a small area outside the base, maybe fifty strides across. In it, you recognize the all-too-familiar monotonicity of the icy wasteland.")
-        Inside.setDescription("The walls are iron plate and frost gives them a faint shimmer. A frozen wall blocks the path ahead.")
-        AttractorTab.setDescription("The accelerator lies before you: The silent remnant of a long-gone past.")
+        Outside.setDescription("Your torches shed light on a small area outside the door, maybe fifty strides across. " +
+                "In it, you recognize the all-too-familiar monotonicity of the icy wasteland.")
+        Inside.setDescription("The walls are iron plate and frost gives them a faint shimmer. A solid wall of ice blocks the path ahead.")
 
         LocationIndicator.show()
         LocationIndicator.set(Outside.displayName)
 
         Resources.add(Resource.MANPOWER, 0)
-        Resources.add(Resource.ENERGY, 8)
 
         val clearIceTask = Interaction("Clear ice block", "clear_ice_block") {
             Resources.add(Resource.ICE, 1)
+            baseClearProgress += 1
+            if (baseClearProgress == BASE_CLEAR_THRESHOLD_1) {
+                enterBaseProper()
+                it.end()
+            }
         }
-        clearIceTask.setRepeatable()
+                .setRepeatable()
                 .incrementCost(Resource.MANPOWER, 1)
-                .progressCost(Resource.ENERGY, 2)
                 .withMaxConcurrent(5)
                 .timed(5000)
 
         Inside.addInteraction(clearIceTask)
 
+    }
+
+    private fun enterBaseProper() {
+        Messages.append("With a final 'Ho!' your pickaxes break through the wall ahead. In the area behind, " +
+                "you find a storage room where you drop off the supplies you brought with you, " +
+                "as well a couple of barracks. It is freezing cold - you should probably think about" +
+                "starting a campfire.\n" +
+                "\n" +
+                "You find a door the seems to lead deeper into the mountain, but it it frozen shut.")
+
+        Inside.setDescription("The walls are iron plate and frost gives them a faint shimmer. A storage rooms " +
+                "keeps your meager supplies. The barracks contain enough space for everyone, though" +
+                "it is much too cold to feel comfortable.")
+
+        Resources.add(Resource.WOOD, 15)
+        Resources.add(Resource.FOOD, 100)
+
+        Inside.enableHeat()
+
+        val burnWoodTask = Interaction("Make a camp fire", "burn_wood_for_heat") {
+            // Inside.increaseHeat(2.0)
+            val heatLevel = when {
+                it.getCurrentActive() <= 10 -> {
+                    Inside.HeatLevel.COZY
+                }
+                it.getCurrentActive() <= 6 -> {
+                    Inside.HeatLevel.WARM
+                }
+                it.getCurrentActive() <= 3 -> {
+                    Inside.HeatLevel.COOL
+                }
+                else -> {
+                    Inside.HeatLevel.COLD
+                }
+            }
+        }
+                .setRepeatable()
+                //.progressCost(Resource.WOOD)
+                .timed(1000)
+                .withMaxConcurrent(10)
+                .onPause { }
+
+        Inside.addInteraction(burnWoodTask)
     }
 }

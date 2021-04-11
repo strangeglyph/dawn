@@ -17,7 +17,9 @@ enum class Resource(val displayName: String, val order: Int, val iconPath: Strin
     APPROACH_DIRECT("No Nonsense", 1000, "resources/direct.svg", "resources/direct_depleted.svg"),
     APPROACH_INDIRECT("Thinking Outside The Box", 1010, "resources/indirect.svg", "resources/indirect_depleted.svg"),
     MANPOWER("Manpower", 10, "resources/manpower.svg", "resources/manpower_depleted.svg", 10),
-    ICE("Ice", 20, "resources/ice.svg", "resources/ice_depleted.svg")
+    ICE("Ice", 20, "resources/ice.svg", "resources/ice_depleted.svg"),
+    WOOD("Wood", 10, "resources/wood.svg", "resources/wood_depleted.svg"),
+    FOOD("Food", 12, "resources/food.svg", "resources/food_depleted.svg"),
 }
 
 class ResourceStack(val resource: Resource, val amount: Int)
