@@ -1,18 +1,22 @@
 /**
- * Return a smoothly interpolated value from 0 to maxValue in the domain [0, maxTime]
+ * Return a smoothly interpolated value from initialValue to targetValue in the domain [0, maxTime]
  */
-class SmootherStep(val maxTime: Double, val maxValue: Double) {
+class SmootherStep(val period: Double, val initialValue: Double, val targetValue: Double) {
+    constructor(period: Double, targetValue: Double) : this(period, 0.0, targetValue);
+
     var lastUpdate: Double = 0.0
-    var lastValue: Double = 0.0
+    var lastValue: Double = initialValue
+
+    val diff = targetValue - initialValue;
 
     fun at(time: Double): Double {
-        if (time < 0) return 0.0;
-        if (time > maxTime) return maxValue;
+        if (time < 0) return initialValue;
+        if (time > period) return targetValue;
 
-        val x = time / maxTime;
+        val x = time / period;
         val fractValue = x * x * x * (6 * x * x - 15 * x + 10)
 
-        return fractValue * maxValue
+        return initialValue + fractValue * diff
     }
 
     fun current(): Double {
@@ -20,7 +24,8 @@ class SmootherStep(val maxTime: Double, val maxValue: Double) {
     }
 
     /**
-     * Returns the difference between the old value and the new value and updates the current delta
+     * Increments the current animation time and returns the change between the current and
+     * the previous y
      */
     fun increment(delta: Double): Double {
         val oldCurrent = current()
@@ -32,5 +37,7 @@ class SmootherStep(val maxTime: Double, val maxValue: Double) {
         return newCurrent - oldCurrent
     }
 
-    fun isFinished(): Boolean = lastUpdate >= maxTime
+    fun percentCompleted(): Double = lastUpdate / period
+
+    fun isFinished(): Boolean = lastUpdate >= period
 }

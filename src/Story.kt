@@ -91,25 +91,41 @@ object Story {
         val burnWoodTask = Interaction("Make a camp fire", "burn_wood_for_heat") {
             // Inside.increaseHeat(2.0)
             val heatLevel = when {
-                it.getCurrentActive() <= 10 -> {
-                    Inside.HeatLevel.COZY
-                }
-                it.getCurrentActive() <= 6 -> {
+                it.getCurrentActive() >= 10 -> {
                     Inside.HeatLevel.WARM
                 }
-                it.getCurrentActive() <= 3 -> {
+                it.getCurrentActive() >= 5 -> {
                     Inside.HeatLevel.COOL
                 }
-                else -> {
+                it.getCurrentActive() >= 2 -> {
                     Inside.HeatLevel.COLD
                 }
+                else -> {
+                    Inside.HeatLevel.FREEZING
+                }
             }
+            val partialProgress = when {
+                it.getCurrentActive() >= 10 -> {
+                    0.0
+                }
+                it.getCurrentActive() >= 5 -> {
+                    (it.getCurrentActive() - 5) / 5.0
+                }
+                it.getCurrentActive() >= 2 -> {
+                    (it.getCurrentActive() - 2) / 3.0
+                }
+                else -> {
+                    it.getCurrentActive() / 2.0
+                }
+            }
+            Inside.fadeHeatTo(heatLevel, partialProgress)
         }
-                .setRepeatable()
-                //.progressCost(Resource.WOOD)
-                .timed(1000)
-                .withMaxConcurrent(10)
-                .onPause { }
+        .setRepeatable()
+        //.progressCost(Resource.WOOD)
+        .timed(3000)
+        .withMaxConcurrent(10)
+        .disableTimeScaling()
+        .onPause { Inside.fadeHeatTo(Inside.HeatLevel.FREEZING, 0.0) }
 
         Inside.addInteraction(burnWoodTask)
     }

@@ -10,8 +10,18 @@ object TickThread {
         tasks[name] = task
     }
 
-    fun unregister(name: String) {
+    /**
+     * Unregister a task, raise an exception if it doesn't exist
+     */
+    fun unregisterStrict(name: String) {
         if (name !in tasks) { throw IllegalStateException("Task $name is not registered") }
+        tasks.remove(name)
+    }
+
+    /**
+     * Unregister a task, do nothing if it doesn't exist
+     */
+    fun unregister(name: String) {
         tasks.remove(name)
     }
 
@@ -26,9 +36,9 @@ object TickThread {
             val deltaMillis = (currentTime.getTime() - lastUpdate.getTime()).toInt()
             lastUpdate = currentTime
 
-            println(">> Tick delta $deltaMillis")
+            //println(">> Tick delta $deltaMillis")
             for ((tag, task) in tasks) {
-                println("Ticking $tag")
+                //println("Ticking $tag")
                 task(deltaMillis)
             }
         }, 20)

@@ -4,6 +4,7 @@ class Interaction(val description: String, val tag: String, val action: (Interac
     private val progressCosts: MutableList<ResourceStack> = ArrayList()
     private var timeToExecute: Int = 0
     private var maxConcurrent: Int = 1
+    private var timeScalesWithConcurrent: Boolean = true
     private var currentConcurrent: Int = 0
     private var progress: Int = 0
     private var finishedCallback: () -> Unit = {}
@@ -75,7 +76,8 @@ class Interaction(val description: String, val tag: String, val action: (Interac
 
     /**
      * Set the execution time for a (non-concurrent) execution of this task in milliseconds. Actual execution time
-     * will be scaled according to how many concurrent instances of this task are running.
+     * will be scaled according to how many concurrent instances of this task are running (unless
+     * @disableTimeScaling was called)
      *
      * Defaults to 0, i.e. the task completes immediately
      */
@@ -86,12 +88,22 @@ class Interaction(val description: String, val tag: String, val action: (Interac
 
     /**
      * Set a limit on how often this task can be executed in parallel. Actual execution time
-     * will be scaled according to how many concurrent instances of this task are running.
+     * will be scaled according to how many concurrent instances of this task are running (unless
+     * @disableTimeScaling was called)
      *
      * Defaults to 1.
      */
     fun withMaxConcurrent(amount: Int): Interaction {
         this.maxConcurrent = amount
+        return this
+    }
+
+    /**
+     * Disable time scaling for this task, i.e. the task will take the same time to complete irrespective
+     * of the number of concurrent runs of this task.
+     */
+    fun disableTimeScaling(): Interaction {
+        this.timeScalesWithConcurrent = false
         return this
     }
 
@@ -251,7 +263,11 @@ class Interaction(val description: String, val tag: String, val action: (Interac
     }
 
     private fun tick(deltaMillis: Int) {
-        progress += deltaMillis * currentConcurrent
+        progress += if (timeScalesWithConcurrent) {
+            deltaMillis * currentConcurrent
+        } else {
+            deltaMillis
+        }
 
         // Notify tick handler of our progress, scaled from 0 to 1
         if (progress > timeToExecute) {

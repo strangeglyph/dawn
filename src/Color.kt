@@ -8,6 +8,9 @@ class Color(val red: Int, val green: Int, val blue: Int) {
     }
 
     fun gradientTo(otherColor: Color, progress: Double): Color {
+        if (progress > 1) {
+            return otherColor
+        }
         val interRed = red * (1 - progress) + otherColor.red * progress
         val interGreen = green * (1 - progress) + otherColor.green * progress
         val interBlue = blue * (1 - progress) + otherColor.blue * progress
