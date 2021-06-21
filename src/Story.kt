@@ -74,14 +74,14 @@ object Story {
     private fun enterBaseProper() {
         Messages.append("With a final 'Ho!' your pickaxes break through the wall ahead. In the area behind, " +
                 "you find a storage room where you drop off the supplies you brought with you, " +
-                "as well a couple of barracks. It is freezing cold - you should probably think about" +
+                "as well a couple of barracks. It is freezing cold - you should probably think about " +
                 "starting a campfire.\n" +
                 "\n" +
                 "You find a door the seems to lead deeper into the mountain, but it it frozen shut.")
 
-        Inside.setDescription("The walls are iron plate and frost gives them a faint shimmer. A storage rooms " +
-                "keeps your meager supplies. The barracks contain enough space for everyone, though" +
-                "it is much too cold to feel comfortable.")
+        Inside.setDescription("The walls are iron plate and frost gives them a faint shimmer. A storage room " +
+                "keeps your meager supplies. The barracks contain enough space for everyone, though " +
+                "the current temperature makes sleep a dangerous proposition.")
 
         Resources.add(Resource.WOOD, 15)
         Resources.add(Resource.FOOD, 100)

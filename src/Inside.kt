@@ -79,6 +79,44 @@ object Inside : Tab("inside", "Inside", 10) {
                 """.trimIndent()
     }
 
+    fun onHeatChange() {
+        val descr = when (heat) {
+            HeatLevel.FREEZING -> {
+                "The walls are iron plate and frost gives them a faint shimmer. A storage room " +
+                "keeps your meager supplies. The barracks contain enough space for everyone, though " +
+                "the current temperatures make sleep a dangerous proposition."
+            }
+            HeatLevel.COLD -> {
+                "The walls are iron plate and frost gives them a faint shimmer. A storage room " +
+                "keeps your meager supplies. The barracks contain enough space for everyone. It is " +
+                "uncomfortably cold."
+            }
+            HeatLevel.COOL -> {
+                "The walls are iron plate and frost gives them a faint shimmer. A storage room " +
+                "keeps your meager supplies. The barracks contain enough space for everyone. A small " +
+                "fire in the middle of the room does little to keep away the chill."
+            }
+            HeatLevel.WARM -> {
+                "The walls are iron plate and frost gives them a faint shimmer. A storage room " +
+                "keeps your meager supplies. The barracks contain enough space for everyone. A fire is " +
+                "blazing in the middle of the room, and people crowd around it."
+            }
+            HeatLevel.COZY -> {
+                "The walls are iron plate and frost gives them a faint shimmer. A storage room " +
+                "keeps your meager supplies. The barracks contain enough space for everyone. A roaring " +
+                "fire fills the room with a cozy warmth."
+            }
+            HeatLevel.HOT -> {
+                "The walls are iron plate and frost gives them a faint shimmer. A storage room " +
+                "keeps your meager supplies. The barracks contain enough space for everyone. The room is " +
+                "almost unbearably hot for anyone wearing more than a t-shirt."
+            }
+            HeatLevel.LIMIT -> {
+                "The room spontaneously combusts. Everyone dies in the fire. (You shouldn't be here)"
+            }
+        }
+    }
+
     fun enableHeat() {
         heatDiv.append(heatIndicator)
         MAIN_DIV.append(heatDiv)
@@ -121,7 +159,11 @@ object Inside : Tab("inside", "Inside", 10) {
                 heatIndicator.value = 1.0
             }
 
-            heat = HeatLevel.values()[floor(heatAsNumber).toInt()]
+            val newHeat = HeatLevel.values()[floor(heatAsNumber).toInt()]
+            if (newHeat != heat) {
+                heat = newHeat
+                onHeatChange()
+            }
             currentHeatColor = currentHeatRootColor.gradientTo(targetHeatColor, interpolation.percentCompleted())
             heatStyle.innerHTML = heatRawStyle(currentHeatColor)
 
